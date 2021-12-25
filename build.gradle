@@ -8,10 +8,16 @@ group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+
+	testAgent {
+		transitive = false
+	}
+
 }
 
 repositories {
@@ -23,8 +29,18 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	testAgent("org.jacoco:org.jacoco.agent:0.7.9:runtime")
 }
 
 test {
 	useJUnitPlatform()
+}
+
+tasks.withType(JavaExec) {
+	if (it.name == 'junitPlatformTest') {
+		doFirst {
+			jvmArgs "-javaagent:${configurations.testAgent.singleFile}=destfile=${project.buildDir.name}/jacoco/test.exec"
+		}
+	}
 }
