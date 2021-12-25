@@ -8,6 +8,7 @@ class JacocoJunit5GradleApplicationTests {
 
 	@Test
 	void contextLoads() {
+
 	}
 
 }

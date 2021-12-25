@@ -1,7 +1,7 @@
 plugins {
-	id 'org.springframework.boot' version '2.5.8'
-	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-	id 'java'
+    id 'org.springframework.boot' version '2.5.8'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
 }
 
 group = 'com.example'
@@ -10,37 +10,72 @@ sourceCompatibility = '1.8'
 
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 
-	testAgent {
-		transitive = false
-	}
+    testAgent {
+        transitive = false
+    }
 
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-	testAgent("org.jacoco:org.jacoco.agent:0.7.9:runtime")
+    testAgent("org.jacoco:org.jacoco.agent:0.7.9:runtime")
 }
 
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
+subprojects {
+    jacoco {
+        toolVersion = "0.7.9"
+        reportsDir = file("$buildDir/reports")
+        applyTo junitPlatformTest
+    }
+    jacocoTestReport {
+        group = "Reporting"
+        description = "Generate Jacoco coverage report."
+        classDirectories = fileTree(
+                dir: "$buildDir/classes/java/main"
+        )
+        def coverageSourceDirs = [
+                "src/main/java"
+        ]
+        additionalSourceDirs = files(coverageSourceDirs)
+        sourceDirectories = files(coverageSourceDirs)
+        executionData = files("$buildDir/jacoco/junitPlatformTest.exec")
+        reports {
+            xml.enabled = true
+            html.enabled = true
+            csv.enabled = true
+        }
+
+    }
+    test {
+        jacoco {
+            append = false
+            destinationFile = file("$buildDir/jacoco/junitPlatformTest.exec")
+            includeNoLocationClasses = true
+        }
+    }
+    test.dependsOn junitPlatformTest
+
+}
 tasks.withType(JavaExec) {
-	if (it.name == 'junitPlatformTest') {
-		doFirst {
-			jvmArgs "-javaagent:${configurations.testAgent.singleFile}=destfile=${project.buildDir.name}/jacoco/test.exec"
-		}
-	}
+    if (it.name == 'junitPlatformTest') {
+        doFirst {
+            jvmArgs "-javaagent:${configurations.testAgent.singleFile}=destfile=${project.buildDir.name}/jacoco/test.exec"
+        }
+    }
 }
