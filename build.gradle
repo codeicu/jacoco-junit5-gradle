@@ -37,6 +37,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     testAgent("org.jacoco:org.jacoco.agent:0.7.9:runtime")
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator:2.4.5'
+    implementation 'io.micrometer:micrometer-registry-prometheus:1.8.1'
 }
 
 test {
