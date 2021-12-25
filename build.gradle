@@ -2,12 +2,18 @@ plugins {
     id 'org.springframework.boot' version '2.5.8'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
+    id 'jacoco'
 }
+
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
+jacoco {
+    toolVersion = "0.8.7"
+    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
+}
 
 configurations {
     compileOnly {
@@ -35,47 +41,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-subprojects {
-    jacoco {
-        toolVersion = "0.7.9"
-        reportsDir = file("$buildDir/reports")
-        applyTo junitPlatformTest
-    }
-    jacocoTestReport {
-        group = "Reporting"
-        description = "Generate Jacoco coverage report."
-        classDirectories = fileTree(
-                dir: "$buildDir/classes/java/main"
-        )
-        def coverageSourceDirs = [
-                "src/main/java"
-        ]
-        additionalSourceDirs = files(coverageSourceDirs)
-        sourceDirectories = files(coverageSourceDirs)
-        executionData = files("$buildDir/jacoco/junitPlatformTest.exec")
-        reports {
-            xml.enabled = true
-            html.enabled = true
-            csv.enabled = true
-        }
-
-    }
-    test {
-        jacoco {
-            append = false
-            destinationFile = file("$buildDir/jacoco/junitPlatformTest.exec")
-            includeNoLocationClasses = true
-        }
-    }
-    test.dependsOn junitPlatformTest
-
-}
-tasks.withType(JavaExec) {
-    if (it.name == 'junitPlatformTest') {
-        doFirst {
-            jvmArgs "-javaagent:${configurations.testAgent.singleFile}=destfile=${project.buildDir.name}/jacoco/test.exec"
-        }
-    }
 }
